@@ -1,0 +1,4 @@
+composer.lock
+phpunit.xml
+vendor/
+tests/DiffOutputBuilder/Tests/Integration/out/

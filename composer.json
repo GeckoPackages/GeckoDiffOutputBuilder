@@ -1,0 +1,30 @@
+{
+    "name": "gecko-packages/gecko-diff-output-builder",
+    "type": "library",
+    "homepage": "https://github.com/GeckoPackages",
+    "description": "Additional Diff output builders.",
+    "license": "MIT",
+    "keywords": ["PHPUnit", "Extension", "diff", "udiff", "unified diff"],
+    "require": {
+        "php": "^7.0",
+        "sebastian/diff": "^2.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.7",
+        "phpunit/phpunit": "^6.3.0",
+        "symfony/process": "^3.3"
+    },
+    "autoload": {
+        "psr-4": { "GeckoPackages\\DiffOutputBuilder\\": "src/DiffOutputBuilder/" }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GeckoPackages\\DiffOutputBuilder\\Tests\\": "tests/DiffOutputBuilder/Tests/",
+            "GeckoPackages\\DiffOutputBuilder\\Utils\\": "tests/DiffOutputBuilder/Utils/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

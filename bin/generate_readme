@@ -1,0 +1,35 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the GeckoPackages.
+ *
+ * (c) GeckoPackages https://github.com/GeckoPackages
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+require_once __DIR__.'/../vendor/autoload.php';
+
+if (!class_exists('\GeckoPackages\DiffOutputBuilder\Utils\ReadMeGenerator')) {
+    echo 'ReadMe generator not found, make sure you\'ve installed the dev-dependencies of the project.';
+    exit(-1);
+}
+
+$builder = new \GeckoPackages\DiffOutputBuilder\Utils\ReadMeGenerator();
+$readMeFile = $builder->getReadMeFile();
+
+if (file_exists($readMeFile) && !is_writable($readMeFile)) {
+    echo sprintf('Cannot overwrite "%s".', realpath($readMeFile));
+    exit(-1);
+}
+
+
+if (false === @file_put_contents($readMeFile, $builder->generateReadMe())) {
+    echo sprintf('Failed to write content to "%s".', realpath($readMeFile));
+    exit(-1);
+}
+
+echo sprintf('Readme written to "%s".', realpath($readMeFile));
+exit(0);
