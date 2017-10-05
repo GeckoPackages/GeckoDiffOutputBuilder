@@ -268,12 +268,12 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
     ) {
         \fwrite($output, '@@ -'.$fromStart);
 
-        if (!$this->collapseRanges || 1 !== $fromRange) { // FIXME this fix should go the PHPUnit version as well
+        if (!$this->collapseRanges || 1 !== $fromRange) {
             \fwrite($output, ','.$fromRange);
         }
 
         \fwrite($output, ' +'.$toStart);
-        if (!$this->collapseRanges || 1 !== $toRange) { // FIXME this fix should go the PHPUnit version as well
+        if (!$this->collapseRanges || 1 !== $toRange) {
             \fwrite($output, ','.$toRange);
         }
 
