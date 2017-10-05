@@ -4,7 +4,7 @@
     "homepage": "https://github.com/GeckoPackages",
     "description": "Additional Diff output builders.",
     "license": "MIT",
-    "keywords": ["PHPUnit", "Extension", "diff", "udiff", "unified diff"],
+    "keywords": ["PHPUnit", "Extension", "diff", "udiff", "unidiff", "unified diff"],
     "require": {
         "php": "^7.0",
         "sebastian/diff": "^2.0"
