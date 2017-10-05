@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    backupGlobals="false"
+    backupStaticAttributes="false"
+    beStrictAboutChangesToGlobalState="true"
+    beStrictAboutOutputDuringTests="true"
+    beStrictAboutTestsThatDoNotTestAnything="true"
+    beStrictAboutTodoAnnotatedTests="true"
+    bootstrap="./vendor/autoload.php"
+    colors="true"
+    columns="max"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    processIsolation="false"
+    stopOnFailure="false"
+    verbose="true"
+>
+    <testsuites>
+        <testsuite name="All">
+            <directory>./tests/DiffOutputBuilder/Tests/</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./src/</directory>
+            <file>./tests/DiffOutputBuilder/Utils/UnifiedDiffAssertTrait.php</file>
+        </whitelist>
+    </filter>
+</phpunit>
