@@ -15,17 +15,15 @@ matrix:
         - php: 7.2
           env: COMPOSER_FLAGS="--prefer-stable"
         - php: nightly
-          env: COMPOSER_FLAGS="--dev"
+          env: COMPOSER_FLAGS="--ignore-platform-reqs"
         - php: hhvm-nightly
+          env: COMPOSER_FLAGS="--ignore-platform-reqs"
           sudo: required
           dist: trusty
           group: edge
-          env: COMPOSER_FLAGS="--dev"
     allow_failures:
         - php: nightly
-          env: COMPOSER_FLAGS="--prefer-stable --ignore-platform-reqs"
         - php: hhvm-nightly
-          env: COMPOSER_FLAGS="--prefer-stable --ignore-platform-reqs"
 
 install:
     - travis_retry composer update $COMPOSER_FLAGS --no-interaction -v
