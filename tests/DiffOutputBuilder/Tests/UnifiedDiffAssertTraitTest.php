@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the GeckoPackages.
  *
@@ -26,18 +24,19 @@ use PHPUnit\Framework\TestCase;
 final class UnifiedDiffAssertTraitTest extends TestCase
 {
     use UnifiedDiffAssertTrait;
+    use PHPUnitPolyfill;
 
     /**
      * @param string $diff
      *
      * @dataProvider provideValidCases
      */
-    public function testValidCases(string $diff)
+    public function testValidCases($diff)
     {
         $this->assertValidUnifiedDiffFormat($diff);
     }
 
-    public function provideValidCases(): array
+    public function provideValidCases()
     {
         return [
             [

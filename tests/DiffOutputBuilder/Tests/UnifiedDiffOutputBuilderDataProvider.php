@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the GeckoPackages.
  *
@@ -22,7 +20,7 @@ namespace GeckoPackages\DiffOutputBuilder\Tests;
  */
 final class UnifiedDiffOutputBuilderDataProvider
 {
-    public static function provideOutputBuildingCases(): array
+    public static function provideOutputBuildingCases()
     {
         return [
             [
@@ -83,7 +81,7 @@ final class UnifiedDiffOutputBuilderDataProvider
         ];
     }
 
-    public static function provideSample(): array
+    public static function provideSample()
     {
         return [
             [
@@ -108,7 +106,7 @@ final class UnifiedDiffOutputBuilderDataProvider
         ];
     }
 
-    public static function provideBasicDiffGeneration(): array
+    public static function provideBasicDiffGeneration()
     {
         return [
             [

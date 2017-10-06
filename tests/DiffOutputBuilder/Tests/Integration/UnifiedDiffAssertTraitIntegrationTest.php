@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the GeckoPackages.
  *
@@ -45,7 +43,7 @@ final class UnifiedDiffAssertTraitIntegrationTest extends TestCase
      *
      * @dataProvider provideFilePairsCases
      */
-    public function testValidPatches(string $fileFrom, string $fileTo)
+    public function testValidPatches($fileFrom, $fileTo)
     {
         $command = \sprintf(
             'diff -u %s %s > %s',
@@ -84,7 +82,7 @@ final class UnifiedDiffAssertTraitIntegrationTest extends TestCase
     /**
      * @return array<string, array<string, string>>
      */
-    public function provideFilePairsCases(): array
+    public function provideFilePairsCases()
     {
         $cases = [];
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the GeckoPackages.
  *
@@ -27,11 +25,12 @@ use GeckoPackages\DiffOutputBuilder\Utils\UnifiedDiffAssertTrait;
 final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
 {
     use UnifiedDiffAssertTrait;
+    use PHPUnitPolyfill;
 
     /**
      * {@inheritdoc}
      */
-    public function assertValidDiffFormat(string $diff)
+    public function assertValidDiffFormat($diff)
     {
         $this->assertValidUnifiedDiffFormat($diff);
     }
@@ -39,7 +38,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
     /**
      * {@inheritdoc}
      */
-    public function provideOutputBuildingCases(): array
+    public function provideOutputBuildingCases()
     {
         return UnifiedDiffOutputBuilderDataProvider::provideOutputBuildingCases();
     }
@@ -47,7 +46,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
     /**
      * {@inheritdoc}
      */
-    public function provideSample(): array
+    public function provideSample()
     {
         return UnifiedDiffOutputBuilderDataProvider::provideSample();
     }
@@ -59,7 +58,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
      *
      * @dataProvider provideBasicDiffGeneration
      */
-    public function testBasicDiffGeneration(string $expected, string $from, string $to)
+    public function testBasicDiffGeneration($expected, $from, $to)
     {
         $diff = $this->getDiffer([
             'fromFile' => 'input.txt',
@@ -70,7 +69,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
         $this->assertSame($expected, $diff);
     }
 
-    public function provideBasicDiffGeneration(): array
+    public function provideBasicDiffGeneration()
     {
         return UnifiedDiffOutputBuilderDataProvider::provideBasicDiffGeneration();
     }
@@ -83,7 +82,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
      *
      * @dataProvider provideConfiguredDiffGeneration
      */
-    public function testConfiguredDiffGeneration(string $expected, string $from, string $to, array $config = [])
+    public function testConfiguredDiffGeneration($expected, $from, $to, array $config = [])
     {
         $diff = $this->getDiffer(\array_merge([
             'fromFile' => 'input.txt',
@@ -94,7 +93,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
         $this->assertSame($expected, $diff);
     }
 
-    public function provideConfiguredDiffGeneration(): array
+    public function provideConfiguredDiffGeneration()
     {
         return [
             [
@@ -269,7 +268,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
      *
      * @dataProvider provideInvalidConfiguration
      */
-    public function testInvalidConfiguration(array $options, string $message)
+    public function testInvalidConfiguration(array $options, $message)
     {
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessageRegExp(\sprintf('#^%s$#', \preg_quote($message, '#')));
@@ -277,7 +276,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
         new UnifiedDiffOutputBuilder($options);
     }
 
-    public function provideInvalidConfiguration(): array
+    public function provideInvalidConfiguration()
     {
         $time = \time();
 
@@ -336,7 +335,7 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
      *
      * @dataProvider provideCommonLineThresholdCases
      */
-    public function testCommonLineThreshold(string $expected, string $from, string $to, int $threshold)
+    public function testCommonLineThreshold($expected, $from, $to, $threshold)
     {
         $diff = $this->getDiffer([
             'fromFile' => 'input.txt',
