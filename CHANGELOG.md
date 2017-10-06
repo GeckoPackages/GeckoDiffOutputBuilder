@@ -5,7 +5,7 @@
 This file contains the changelogs of the package.
 
 ### Changelog for v1.0
-###### Pending
+###### Oct 5, 2017
 
 - First stable release
 
