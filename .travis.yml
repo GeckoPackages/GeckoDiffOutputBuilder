@@ -23,7 +23,9 @@ matrix:
           env: COMPOSER_FLAGS="--dev"
     allow_failures:
         - php: nightly
+          env: COMPOSER_FLAGS="--prefer-stable --ignore-platform-reqs"
         - php: hhvm-nightly
+          env: COMPOSER_FLAGS="--prefer-stable --ignore-platform-reqs"
 
 install:
     - travis_retry composer update $COMPOSER_FLAGS --no-interaction -v
