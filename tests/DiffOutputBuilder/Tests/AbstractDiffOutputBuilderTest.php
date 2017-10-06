@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the GeckoPackages.
  *
@@ -13,9 +11,9 @@ declare(strict_types=1);
 
 namespace GeckoPackages\DiffOutputBuilder\Tests;
 
+use PhpCsFixer\Diff\v2_0\Differ;
+use PhpCsFixer\Diff\v2_0\Output\DiffOutputBuilderInterface;
 use PHPUnit\Framework\TestCase;
-use SebastianBergmann\Diff\Differ;
-use SebastianBergmann\Diff\Output\DiffOutputBuilderInterface;
 
 /**
  * @author SpacePossum
@@ -31,11 +29,11 @@ abstract class AbstractDiffOutputBuilderTest extends TestCase
      */
     private $differClass;
 
-    abstract public function provideOutputBuildingCases(): array;
+    abstract public function provideOutputBuildingCases();
 
-    abstract public function provideSample(): array;
+    abstract public function provideSample();
 
-    abstract public function assertValidDiffFormat(string $diff);
+    abstract public function assertValidDiffFormat($diff);
 
     /**
      * @param string $expected
@@ -45,7 +43,7 @@ abstract class AbstractDiffOutputBuilderTest extends TestCase
      *
      * @dataProvider provideOutputBuildingCases
      */
-    public function testOutputBuilding(string $expected, string $from, string $to, array $options)
+    public function testOutputBuilding($expected, $from, $to, array $options)
     {
         $diff = $this->getDiffer($options)->diff($from, $to);
 
@@ -61,7 +59,7 @@ abstract class AbstractDiffOutputBuilderTest extends TestCase
      *
      * @dataProvider provideSample
      */
-    public function testSample(string $expected, string $from, string $to, array $options)
+    public function testSample($expected, $from, $to, array $options)
     {
         $diff = $this->getDiffer($options)->diff($from, $to);
 
@@ -76,7 +74,7 @@ abstract class AbstractDiffOutputBuilderTest extends TestCase
      *
      * @return Differ
      */
-    protected function getDiffer(array $options = []): Differ
+    protected function getDiffer(array $options = [])
     {
         if (null === $this->differClass) {
             // map test class name (child) back to the Differ being tested.

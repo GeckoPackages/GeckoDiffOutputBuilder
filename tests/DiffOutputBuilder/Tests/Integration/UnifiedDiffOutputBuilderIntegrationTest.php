@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the GeckoPackages.
  *
@@ -15,8 +13,8 @@ namespace GeckoPackages\DiffOutputBuilder\Tests;
 
 use GeckoPackages\DiffOutputBuilder\UnifiedDiffOutputBuilder;
 use GeckoPackages\DiffOutputBuilder\Utils\UnifiedDiffAssertTrait;
+use PhpCsFixer\Diff\v2_0\Differ;
 use PHPUnit\Framework\TestCase;
-use SebastianBergmann\Diff\Differ;
 use Symfony\Component\Process\Process;
 
 /**
@@ -63,7 +61,7 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
      *
      * @dataProvider provideFilePairs
      */
-    public function testIntegrationUsingPHPFileInVendor(string $fileFrom, string $fileTo)
+    public function testIntegrationUsingPHPFileInVendor($fileFrom, $fileTo)
     {
         $from = @\file_get_contents($fileFrom);
         $this->assertInternalType('string', $from, \sprintf('Failed to read file "%s".', $fileFrom));
@@ -94,27 +92,27 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
      * @dataProvider provideSample
      * @dataProvider provideBasicDiffGeneration
      */
-    public function testIntegrationOfUnitTestCases(string $expected, string $from, string $to)
+    public function testIntegrationOfUnitTestCases($expected, $from, $to)
     {
         $this->doIntegrationTest($expected, $from, $to);
     }
 
-    public function provideOutputBuildingCases(): array
+    public function provideOutputBuildingCases()
     {
         return UnifiedDiffOutputBuilderDataProvider::provideOutputBuildingCases();
     }
 
-    public function provideSample(): array
+    public function provideSample()
     {
         return UnifiedDiffOutputBuilderDataProvider::provideSample();
     }
 
-    public function provideBasicDiffGeneration(): array
+    public function provideBasicDiffGeneration()
     {
         return UnifiedDiffOutputBuilderDataProvider::provideBasicDiffGeneration();
     }
 
-    public function provideFilePairs(): array
+    public function provideFilePairs()
     {
         $cases = [];
         $fromFile = __FILE__;
@@ -145,7 +143,7 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
      *
      * @dataProvider provideBasicDiffGeneration
      */
-    public function testIntegrationDiffOutputBuilderVersusDiffCommand(string $diff, string $from, string $to)
+    public function testIntegrationDiffOutputBuilderVersusDiffCommand($diff, $from, $to)
     {
         $this->assertNotFalse(\file_put_contents($this->fileFrom, $from));
         $this->assertNotFalse(\file_put_contents($this->fileTo, $to));
@@ -169,7 +167,7 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
         $this->assertSame($diff, $output);
     }
 
-    private function doIntegrationTest(string $diff, string $from, string $to)
+    private function doIntegrationTest($diff, $from, $to)
     {
         if ('' === $diff) {
             $this->addToAssertionCount(1); // Empty diff has no integration test part.

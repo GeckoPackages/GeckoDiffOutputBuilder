@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the GeckoPackages.
  *
@@ -13,7 +11,7 @@ declare(strict_types=1);
 
 namespace GeckoPackages\DiffOutputBuilder;
 
-use SebastianBergmann\Diff\Output\DiffOutputBuilderInterface;
+use PhpCsFixer\Diff\v2_0\Output\DiffOutputBuilderInterface;
 
 /**
  * Strict Unified diff output builder.
@@ -109,7 +107,7 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
         $this->contextLines = $options['contextLines'];
     }
 
-    public function getDiff(array $diff): string
+    public function getDiff(array $diff)
     {
         if (0 === \count($diff)) {
             return '';
@@ -258,12 +256,12 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
 
     private function writeHunk(
         array $diff,
-        int $diffStartIndex,
-        int $diffEndIndex,
-        int $fromStart,
-        int $fromRange,
-        int $toStart,
-        int $toRange,
+        $diffStartIndex,
+        $diffEndIndex,
+        $fromStart,
+        $fromRange,
+        $toStart,
+        $toRange,
         $output
     ) {
         \fwrite($output, '@@ -'.$fromStart);

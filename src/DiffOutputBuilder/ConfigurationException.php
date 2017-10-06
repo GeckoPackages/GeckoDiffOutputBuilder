@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the GeckoPackages.
  *
@@ -18,10 +16,10 @@ use Exception;
 final class ConfigurationException extends \InvalidArgumentException
 {
     public function __construct(
-        string $option,
-        string $expected,
+        $option,
+        $expected,
         $value,
-        int $code = 0,
+        $code = 0,
         Exception $previous = null
     ) {
         parent::__construct(
