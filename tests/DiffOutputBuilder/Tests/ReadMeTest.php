@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace GeckoPackages\DiffOutputBuilder\Tests\ReadMe;
+namespace GeckoPackages\DiffOutputBuilder\Tests;
 
 use GeckoPackages\DiffOutputBuilder\Utils\ReadMeGenerator;
 use PHPUnit\Framework\TestCase;
