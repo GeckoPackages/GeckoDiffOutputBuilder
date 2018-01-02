@@ -13,7 +13,6 @@ This package is framework agnostic, meaning that you can use it in any PHP proje
 
 ### Install
 
-
 The package can be installed using Composer:
 
 ```
@@ -79,7 +78,7 @@ Diff:
 
 Options:
 - `contextLines`, default: `3`.
-- `collapseRanges`, default: `1`.
+- `collapseRanges`, default: `true`.
 - `fromFile`, default: `<null>`.
 - `fromFileDate`, default: `<null>`.
 - `toFile`, default: `<null>`.

@@ -33,18 +33,17 @@ Pure PHP strict Unified diff format output builder (similar to `diff -u`).
 
 ### Requirements
 
-PHP 7<br/>
-`sebastian/diff` `^2.0`<br/>
-This package is framework agnostic, meaning that you can use it in any PHP project.<br/>
+- PHP 7
+- `sebastian/diff` `^2.0`
+
+This package is framework agnostic, meaning that you can use it in any PHP project.
 
 ### Install
 
-The package can be installed using Composer. Add the package to your `composer.json`.
+The package can be installed using Composer:
 
 ```
-"require": {
-    "gecko-packages/gecko-diff-output-builder" : "^1.0"
-}
+composer require gecko-packages/gecko-diff-output-builder
 ```
 
 ### Usage
@@ -53,9 +52,9 @@ The package can be installed using Composer. Add the package to your `composer.j
 
 ### Links
 
-[Get Composer](https://getcomposer.org/)<br/>
-[Sebastian Bergmann Diff repository](https://github.com/sebastianbergmann/diff)<br/>
-[Unified diff format description](https://www.gnu.org/software/diffutils/manual/html_node/Unified-Format.html)<br/>
+- [Get Composer](https://getcomposer.org/)
+- [Sebastian Bergmann Diff repository](https://github.com/sebastianbergmann/diff)
+- [Unified diff format description](https://www.gnu.org/software/diffutils/manual/html_node/Unified-Format.html)
 
 ### License
 
@@ -75,6 +74,7 @@ We do not keep a backwards compatible promise on code annotated with `@internal`
 nor the content and/or format of exception/error messages.</sub>
 
 This project is maintained on [github :octocat:](https://github.com/GeckoPackages/GeckoDiffOutputBuilder). Visit us! :)
+
 TEMPLATE
 ;
 
@@ -160,12 +160,20 @@ $diff = $differ->diff($from, $to);
         );
 
         foreach ($reflection->getStaticProperties()['default'] as $option => $default) {
-            $options .= \sprintf("- `%s`, default: `%s`.\n", $option, null === $default ? '<null>' : $default);
+            if (null === $default) {
+                $default = '<null>';
+            } elseif (false === $default) {
+                $default = 'false';
+            } elseif (true === $default) {
+                $default = 'true';
+            }
+
+            $options .= \sprintf("- `%s`, default: `%s`.\n", $option, $default);
         }
 
         return
             '## '.$name.
-            "\n###### ".$reflection->getName().
+            "\n\n###### ".$reflection->getName().
             "\n\n".$description.
             "\n\nExample:\n```php\n".$sample."\n```\n".
             "\nDiff:\n```diff\n".$diff."```\n".
