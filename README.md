@@ -6,23 +6,23 @@ Pure PHP strict Unified diff format output builder (similar to `diff -u`).
 
 ### Requirements
 
-PHP 7<br/>
-`sebastian/diff` `^2.0`<br/>
-This package is framework agnostic, meaning that you can use it in any PHP project.<br/>
+- PHP 7
+- `sebastian/diff` `^2.0`
+
+This package is framework agnostic, meaning that you can use it in any PHP project.
 
 ### Install
 
-The package can be installed using Composer. Add the package to your `composer.json`.
+The package can be installed using Composer:
 
 ```
-"require": {
-    "gecko-packages/gecko-diff-output-builder" : "^1.0"
-}
+composer require gecko-packages/gecko-diff-output-builder
 ```
 
 ### Usage
 
 ## Unified diff output builder
+
 ###### GeckoPackages\DiffOutputBuilder\UnifiedDiffOutputBuilder
 
 Generates (strict) Unified diff's (unidiffs) with hunks.
@@ -78,7 +78,7 @@ Diff:
 
 Options:
 - `contextLines`, default: `3`.
-- `collapseRanges`, default: `1`.
+- `collapseRanges`, default: `true`.
 - `fromFile`, default: `<null>`.
 - `fromFileDate`, default: `<null>`.
 - `toFile`, default: `<null>`.
@@ -88,9 +88,9 @@ Options:
 
 ### Links
 
-[Get Composer](https://getcomposer.org/)<br/>
-[Sebastian Bergmann Diff repository](https://github.com/sebastianbergmann/diff)<br/>
-[Unified diff format description](https://www.gnu.org/software/diffutils/manual/html_node/Unified-Format.html)<br/>
+- [Get Composer](https://getcomposer.org/)
+- [Sebastian Bergmann Diff repository](https://github.com/sebastianbergmann/diff)
+- [Unified diff format description](https://www.gnu.org/software/diffutils/manual/html_node/Unified-Format.html)
 
 ### License
 
