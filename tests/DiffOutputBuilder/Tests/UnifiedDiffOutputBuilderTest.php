@@ -98,6 +98,18 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
     {
         return [
             [
+                '--- input.txt
++++ output.txt
+@@ -1 +1 @@
+-a
+\ No newline at end of file
++b
+\ No newline at end of file
+',
+                'a',
+                'b',
+            ],
+            [
                 '',
                 "1\n2",
                 "1\n2",
@@ -382,6 +394,225 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
                 "A\nX\nV\nY\n",
                 "A\nB\nV\nD\n",
                 1,
+            ],
+        ];
+    }
+
+    /**
+     * @param string $expected
+     * @param string $from
+     * @param string $to
+     * @param int    $contextLines
+     * @param int    $commonLineThreshold
+     *
+     * @dataProvider provideContextLineConfigurationCases
+     */
+    public function testContextLineConfiguration(string $expected, string $from, string $to, int $contextLines, int $commonLineThreshold = 6)
+    {
+        $diff = $this->getDiffer([
+            'fromFile' => 'input.txt',
+            'toFile' => 'output.txt',
+            'contextLines' => $contextLines,
+            'commonLineThreshold' => $commonLineThreshold,
+        ])->diff($from, $to);
+
+        $this->assertValidDiffFormat($diff);
+        $this->assertSame($expected, $diff);
+    }
+
+    public function provideContextLineConfigurationCases()
+    {
+        $from = "A\nB\nC\nD\nE\nF\nX\nG\nH\nI\nJ\nK\nL\nM\n";
+        $to = "A\nB\nC\nD\nE\nF\nY\nG\nH\nI\nJ\nK\nL\nM\n";
+
+        return [
+            'EOF 0' => [
+                "--- input.txt\n+++ output.txt\n@@ -3 +3 @@
+-X
+\\ No newline at end of file
++Y
+\\ No newline at end of file
+",
+                "A\nB\nX",
+                "A\nB\nY",
+                0,
+            ],
+            'EOF 1' => [
+                "--- input.txt\n+++ output.txt\n@@ -2,2 +2,2 @@
+ B
+-X
+\\ No newline at end of file
++Y
+\\ No newline at end of file
+",
+                "A\nB\nX",
+                "A\nB\nY",
+                1,
+],
+            'EOF 2' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,3 +1,3 @@
+ A
+ B
+-X
+\\ No newline at end of file
++Y
+\\ No newline at end of file
+",
+                "A\nB\nX",
+                "A\nB\nY",
+                2,
+            ],
+            'EOF 200' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,3 +1,3 @@
+ A
+ B
+-X
+\\ No newline at end of file
++Y
+\\ No newline at end of file
+",
+                "A\nB\nX",
+                "A\nB\nY",
+                200,
+            ],
+            'n/a 0' => [
+                "--- input.txt\n+++ output.txt\n@@ -7 +7 @@\n-X\n+Y\n",
+                $from,
+                $to,
+                0,
+            ],
+            'G' => [
+                "--- input.txt\n+++ output.txt\n@@ -6,3 +6,3 @@\n F\n-X\n+Y\n G\n",
+                $from,
+                $to,
+                1,
+            ],
+            'H' => [
+                "--- input.txt\n+++ output.txt\n@@ -5,5 +5,5 @@\n E\n F\n-X\n+Y\n G\n H\n",
+                $from,
+                $to,
+                2,
+            ],
+            'I' => [
+                "--- input.txt\n+++ output.txt\n@@ -4,7 +4,7 @@\n D\n E\n F\n-X\n+Y\n G\n H\n I\n",
+                $from,
+                $to,
+                3,
+            ],
+            'J' => [
+                "--- input.txt\n+++ output.txt\n@@ -3,9 +3,9 @@\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n",
+                $from,
+                $to,
+                4,
+            ],
+            'K' => [
+                "--- input.txt\n+++ output.txt\n@@ -2,11 +2,11 @@\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n",
+                $from,
+                $to,
+                5,
+            ],
+            'L' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,13 +1,13 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n",
+                $from,
+                $to,
+                6,
+            ],
+            'M' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,14 +1,14 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n M\n",
+                $from,
+                $to,
+                7,
+            ],
+            'M+1' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,14 +1,14 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n M\n",
+                $from,
+                $to,
+                8,
+            ],
+            'M+100' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,14 +1,14 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n M\n",
+                $from,
+                $to,
+                107,
+            ],
+            '0 II' => [
+                "--- input.txt\n+++ output.txt\n@@ -12 +12 @@\n-X\n+Y\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nX\nM\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nY\nM\n",
+                0,
+                999,
+            ],
+            '0\' II' => [
+                "--- input.txt\n+++ output.txt\n@@ -12 +12 @@\n-X\n+Y\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nX\nM\nA\nA\nA\nA\nA\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nY\nM\nA\nA\nA\nA\nA\n",
+                0,
+                999,
+            ],
+            '0\'\' II' => [
+                "--- input.txt\n+++ output.txt\n@@ -12,2 +12,2 @@\n-X\n-M\n\\ No newline at end of file\n+Y\n+M\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nX\nM",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nY\nM\n",
+                0,
+            ],
+            '0\'\'\' II' => [
+                "--- input.txt\n+++ output.txt\n@@ -12,2 +12,2 @@\n-X\n-X1\n+Y\n+Y2\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nX\nX1\nM\nA\nA\nA\nA\nA\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nY\nY2\nM\nA\nA\nA\nA\nA\n",
+                0,
+                999,
+            ],
+            '1 II' => [
+                "--- input.txt\n+++ output.txt\n@@ -11,3 +11,3 @@\n K\n-X\n+Y\n M\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nX\nM\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nY\nM\n",
+                1,
+            ],
+            '5 II' => [
+                "--- input.txt\n+++ output.txt\n@@ -7,7 +7,7 @@\n G\n H\n I\n J\n K\n-X\n+Y\n M\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nX\nM\n",
+                "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nY\nM\n",
+                5,
+            ],
+            [
+                '--- input.txt
++++ output.txt
+@@ -1,28 +1,28 @@
+ A
+-X
++B
+ V
+-Y
++D
+ 1
+ A
+ 2
+ A
+ 3
+ A
+ 4
+ A
+ 8
+ A
+ 9
+ A
+ 5
+ A
+ A
+ A
+ A
+ A
+ A
+ A
+ A
+ A
+ A
+ A
+',
+                "A\nX\nV\nY\n1\nA\n2\nA\n3\nA\n4\nA\n8\nA\n9\nA\n5\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\n",
+                "A\nB\nV\nD\n1\nA\n2\nA\n3\nA\n4\nA\n8\nA\n9\nA\n5\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\n",
+                9999,
+                99999,
             ],
         ];
     }

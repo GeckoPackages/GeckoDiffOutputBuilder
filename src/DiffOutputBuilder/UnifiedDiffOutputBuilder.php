@@ -185,24 +185,21 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
                 ++$fromRange;
 
                 if ($sameCount === $cutOff) {
-                    $contextStartOffset = $hunkCapture - $this->contextLines < 0
+                    $contextStartOffset = ($hunkCapture - $this->contextLines) < 0
                         ? $hunkCapture
                         : $this->contextLines
                     ;
 
-                    $contextEndOffset = $i + $this->contextLines >= \count($diff)
-                        ? \count($diff) - $i
-                        : $this->contextLines
-                    ;
+                    // note: $contextEndOffset = $this->contextLines;
 
                     $this->writeHunk(
                         $diff,
                         $hunkCapture - $contextStartOffset,
-                        $i - $cutOff + $contextEndOffset + 1,
+                        $i - $cutOff + $this->contextLines + 1,
                         $fromStart - $contextStartOffset,
-                        $fromRange - $cutOff + $contextStartOffset + $contextEndOffset,
+                        $fromRange - $cutOff + $contextStartOffset + $this->contextLines,
                         $toStart - $contextStartOffset,
-                        $toRange - $cutOff + $contextStartOffset + $contextEndOffset,
+                        $toRange - $cutOff + $contextStartOffset + $this->contextLines,
                         $output
                     );
 
@@ -238,19 +235,27 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
         }
 
         if (false !== $hunkCapture) {
+            // we end here when cutoff (commonLineThreshold) was not reached, but we where capturing a hunk,
+            // do not render hunk till end automatically because the number of context lines might be less than the commonLineThreshold
+
             $contextStartOffset = $hunkCapture - $this->contextLines < 0
                 ? $hunkCapture
                 : $this->contextLines
             ;
 
+            $contextEndOffset = \min($sameCount, $this->contextLines);
+
+            $fromRange -= $sameCount;
+            $toRange -= $sameCount;
+
             $this->writeHunk(
                 $diff,
                 $hunkCapture - $contextStartOffset,
-                \count($diff),
+                $i - $sameCount + $contextEndOffset + 1,
                 $fromStart - $contextStartOffset,
-                $fromRange + $contextStartOffset,
+                $fromRange + $contextStartOffset + $contextEndOffset,
                 $toStart - $contextStartOffset,
-                $toRange + $contextStartOffset,
+                $toRange + $contextStartOffset + $contextEndOffset,
                 $output
             );
         }
