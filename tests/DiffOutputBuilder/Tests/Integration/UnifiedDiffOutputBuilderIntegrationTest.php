@@ -63,13 +63,10 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
      *
      * @dataProvider provideFilePairs
      */
-    public function testIntegrationUsingPHPFileInVendor(string $fileFrom, string $fileTo)
+    public function testIntegrationUsingPHPFileInVendorGitApply(string $fileFrom, string $fileTo)
     {
-        $from = @\file_get_contents($fileFrom);
-        $this->assertInternalType('string', $from, \sprintf('Failed to read file "%s".', $fileFrom));
-
-        $to = @\file_get_contents($fileTo);
-        $this->assertInternalType('string', $to, \sprintf('Failed to read file "%s".', $fileTo));
+        $from = self::getFileContent($fileFrom);
+        $to = self::getFileContent($fileTo);
 
         $diff = (new Differ(new UnifiedDiffOutputBuilder(['fromFile' => 'Original', 'toFile' => 'New'])))->diff($from, $to);
 
@@ -80,9 +77,37 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
             return;
         }
 
-        $this->assertNotSame('', $diff);
-        $this->assertValidUnifiedDiffFormat($diff);
-        $this->doIntegrationTest($diff, $from, $to);
+        $this->doIntegrationTestGitApply($diff, $from, $to);
+    }
+
+    /**
+     * Integration test
+     *
+     * - get a file pair
+     * - create a `diff` between the files
+     * - test applying the diff using `git apply`
+     * - test applying the diff using `patch`
+     *
+     * @param string $fileFrom
+     * @param string $fileTo
+     *
+     * @dataProvider provideFilePairs
+     */
+    public function testIntegrationUsingPHPFileInVendorPatch(string $fileFrom, string $fileTo)
+    {
+        $from = self::getFileContent($fileFrom);
+        $to = self::getFileContent($fileTo);
+
+        $diff = (new Differ(new UnifiedDiffOutputBuilder(['fromFile' => 'Original', 'toFile' => 'New'])))->diff($from, $to);
+
+        if ('' === $diff && $from === $to) {
+            // odd case: test after executing as it is more efficient than to read the files and check the contents every time
+            $this->addToAssertionCount(1);
+
+            return;
+        }
+
+        $this->doIntegrationTestPatch($diff, $from, $to);
     }
 
     /**
@@ -94,9 +119,23 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
      * @dataProvider provideSample
      * @dataProvider provideBasicDiffGeneration
      */
-    public function testIntegrationOfUnitTestCases(string $expected, string $from, string $to)
+    public function testIntegrationOfUnitTestCasesGitApply(string $expected, string $from, string $to)
     {
-        $this->doIntegrationTest($expected, $from, $to);
+        $this->doIntegrationTestGitApply($expected, $from, $to);
+    }
+
+    /**
+     * @param string $expected
+     * @param string $from
+     * @param string $to
+     *
+     * @dataProvider provideOutputBuildingCases
+     * @dataProvider provideSample
+     * @dataProvider provideBasicDiffGeneration
+     */
+    public function testIntegrationOfUnitTestCasesPatch(string $expected, string $from, string $to)
+    {
+        $this->doIntegrationTestPatch($expected, $from, $to);
     }
 
     public function provideOutputBuildingCases(): array
@@ -119,7 +158,7 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
         $cases = [];
         $fromFile = __FILE__;
         $vendorDir = \realpath(__DIR__.'/../../../../vendor');
-        $vendorDirLength = \strlen($vendorDir);
+
         $fileIterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($vendorDir, \RecursiveDirectoryIterator::SKIP_DOTS));
 
         /** @var \SplFileInfo $file */
@@ -129,7 +168,7 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
             }
 
             $toFile = $file->getPathname();
-            $cases[\sprintf("Diff file:\n\"%s\"\nvs.\n\"%s\"\n", \substr(\realpath($fromFile), $vendorDirLength), \substr(\realpath($toFile), $vendorDirLength))] = [$fromFile, $toFile];
+            $cases[\sprintf("Diff file:\n\"%s\"\nvs.\n\"%s\"\n", \realpath($fromFile), \realpath($toFile))] = [$fromFile, $toFile];
             $fromFile = $toFile;
         }
 
@@ -152,7 +191,7 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
 
         $p = new Process(\sprintf('diff -u %s %s', \escapeshellarg($this->fileFrom), \escapeshellarg($this->fileTo)));
         $p->run();
-        $this->assertSame(1, $p->getExitCode());
+        $this->assertSame(1, $p->getExitCode()); // note: Process assumes exit code 0 for `isSuccessful`, however `diff` uses the exit code `1` for success with diff
 
         $output = $p->getOutput();
 
@@ -169,24 +208,18 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
         $this->assertSame($diff, $output);
     }
 
-    private function doIntegrationTest(string $diff, string $from, string $to)
+    private function doIntegrationTestGitApply(string $diff, string $from, string $to)
     {
-        if ('' === $diff) {
-            $this->addToAssertionCount(1); // Empty diff has no integration test part.
+        $this->assertNotSame('', $diff);
+        $this->assertValidUnifiedDiffFormat($diff);
 
-            return;
-        }
-
-        $diffLines = \preg_split('/(.*\R)/', $diff, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $diffLines[0] = \preg_replace('#^\-\-\- .*#', '--- /'.$this->fileFrom, $diffLines[0], 1);
-        $diffLines[1] = \preg_replace('#^\+\+\+ .*#', '+++ /'.$this->fileFrom, $diffLines[1], 1);
-        $diff = \implode('', $diffLines);
+        $diff = self::setDiffFileHeader($diff, $this->fileFrom);
 
         $this->assertNotFalse(\file_put_contents($this->fileFrom, $from));
         $this->assertNotFalse(\file_put_contents($this->filePatch, $diff));
 
         $command = \sprintf(
-            'git --git-dir %s apply --check -v --unsafe-paths %s', // --unidiff-zero --ignore-whitespace
+            'git --git-dir %s apply --check -v --unsafe-paths --ignore-whitespace %s',
             \escapeshellarg($this->dir),
             \escapeshellarg($this->filePatch)
         );
@@ -194,16 +227,18 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
         $p = new Process($command);
         $p->run();
 
-        $this->assertTrue(
-            $p->isSuccessful(),
-            \sprintf(
-                "Command exec. was not successful:\n\"%s\"\nOutput:\n\"%s\"\nStdErr:\n\"%s\"\nExit code %d.\n",
-                $command,
-                $p->getOutput(),
-                $p->getErrorOutput(),
-                $p->getExitCode()
-            )
-        );
+        $this->assertProcessSuccessful($p);
+    }
+
+    private function doIntegrationTestPatch(string $diff, string $from, string $to)
+    {
+        $this->assertNotSame('', $diff);
+        $this->assertValidUnifiedDiffFormat($diff);
+
+        $diff = self::setDiffFileHeader($diff, $this->fileFrom);
+
+        $this->assertNotFalse(\file_put_contents($this->fileFrom, $from));
+        $this->assertNotFalse(\file_put_contents($this->filePatch, $diff));
 
         $command = \sprintf(
             'patch -u --verbose --posix %s < %s',
@@ -214,21 +249,11 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
         $p = new Process($command);
         $p->run();
 
-        $output = $p->getOutput();
-
-        $this->assertTrue(
-            $p->isSuccessful(),
-            \sprintf(
-                "Command exec. was not successful:\n\"%s\"\nOutput:\n\"%s\"\nStdErr:\n\"%s\"\nExit code %d.\n",
-                $command,
-                $output,
-                $p->getErrorOutput(),
-                $p->getExitCode()
-            )
-        );
+        $this->assertProcessSuccessful($p);
 
         $this->assertStringEqualsFile(
-            $this->fileFrom, $to,
+            $this->fileFrom,
+            $to,
             \sprintf('Patch command "%s".', $command)
         );
     }
@@ -238,6 +263,20 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
         $this->cleanUpTempFiles();
     }
 
+    private function assertProcessSuccessful(Process $p)
+    {
+        $this->assertTrue(
+            $p->isSuccessful(),
+            \sprintf(
+                "Command exec. was not successful:\n\"%s\"\nOutput:\n\"%s\"\nStdErr:\n\"%s\"\nExit code %d.\n",
+                $p->getCommandLine(),
+                $p->getOutput(),
+                $p->getErrorOutput(),
+                $p->getExitCode()
+            )
+        );
+    }
+
     private function cleanUpTempFiles()
     {
         @\unlink($this->fileFrom.'.orig');
@@ -245,5 +284,30 @@ final class UnifiedDiffOutputBuilderIntegrationTest extends TestCase
         @\unlink($this->fileFrom);
         @\unlink($this->fileTo);
         @\unlink($this->filePatch);
+    }
+
+    private static function setDiffFileHeader(string $diff, string $file): string
+    {
+        $diffLines = \preg_split('/(.*\R)/', $diff, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $diffLines[0] = \preg_replace('#^\-\-\- .*#', '--- /'.$file, $diffLines[0], 1);
+        $diffLines[1] = \preg_replace('#^\+\+\+ .*#', '+++ /'.$file, $diffLines[1], 1);
+
+        return \implode('', $diffLines);
+    }
+
+    private static function getFileContent(string $file): string
+    {
+        $content = @\file_get_contents($file);
+        if (false === $content) {
+            $error = \error_get_last();
+
+            throw new \RuntimeException(\sprintf(
+                'Failed to read content of file "%s".%s',
+                $file,
+                $error ? ' '.$error['message'] : ''
+            ));
+        }
+
+        return $content;
     }
 }

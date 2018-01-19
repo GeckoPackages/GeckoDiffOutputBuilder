@@ -149,7 +149,8 @@ trait UnifiedDiffAssertTrait
 
             $expectHunkHeader =
                 $diffLineFromNumber === ($fromStart + $fromTillOffset)
-                && $diffLineToNumber === ($toStart + $toTillOffset);
+                && $diffLineToNumber === ($toStart + $toTillOffset)
+            ;
         }
 
         if (

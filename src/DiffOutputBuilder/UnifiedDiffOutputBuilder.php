@@ -59,13 +59,13 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
     private $contextLines;
 
     private static $default = [
-        'contextLines' => 3, // like `diff:  -u, -U NUM, --unified[=NUM]`, for patch/git apply compatibility best to keep at least @ 3
-        'collapseRanges' => true, // ranges of length one are rendered with the trailing `,1`
+        'collapseRanges' => true,   // ranges of length one are rendered with the trailing `,1`
+        'commonLineThreshold' => 6, // number of same lines before ending a new hunk and creating a new one (if needed)
+        'contextLines' => 3,        // like `diff:  -u, -U NUM, --unified[=NUM]`, for patch/git apply compatibility best to keep at least @ 3
         'fromFile' => null,
         'fromFileDate' => null,
         'toFile' => null,
         'toFileDate' => null,
-        'commonLineThreshold' => 6, // number of same lines before ending a new hunk and creating a new one (if needed)
     ];
 
     public function __construct(array $options = [])
@@ -122,15 +122,24 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
 
         $this->writeDiffHunks($buffer, $diff);
 
+        if (!$this->changed) {
+            \fclose($buffer);
+
+            return '';
+        }
+
         $diff = \stream_get_contents($buffer, -1, 0);
 
         \fclose($buffer);
 
-        if (!$this->changed) {
-            return '';
-        }
+        // If the last char is not a linebreak: add it.
+        // This might happen when both the `from` and `to` do not have a trailing linebreak
+        $last = \substr($diff, -1);
 
-        return $diff;
+        return "\n" !== $last && "\r" !== $last
+            ? $diff."\n"
+            : $diff
+        ;
     }
 
     private function writeDiffHunks($output, array $diff)
@@ -139,7 +148,6 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
 
         $upperLimit = \count($diff);
 
-        // append "\ No newline at end of file" if needed
         if (0 === $diff[$upperLimit - 1][1]) {
             $lc = \substr($diff[$upperLimit - 1][0], -1);
             if ("\n" !== $lc) {
@@ -191,6 +199,15 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
                     ;
 
                     // note: $contextEndOffset = $this->contextLines;
+                    //
+                    // because we never go beyond the end of the diff.
+                    // with the cutoff/contextlines here the follow is never true;
+                    //
+                    // if ($i - $cutOff + $this->contextLines + 1 > \count($diff)) {
+                    //    $contextEndOffset = count($diff) - 1;
+                    // }
+                    //
+                    // ; that would be true for a trailing incomplete hunk case which is dealt with after this loop
 
                     $this->writeHunk(
                         $diff,
@@ -234,31 +251,35 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
             }
         }
 
-        if (false !== $hunkCapture) {
-            // we end here when cutoff (commonLineThreshold) was not reached, but we where capturing a hunk,
-            // do not render hunk till end automatically because the number of context lines might be less than the commonLineThreshold
-
-            $contextStartOffset = $hunkCapture - $this->contextLines < 0
-                ? $hunkCapture
-                : $this->contextLines
-            ;
-
-            $contextEndOffset = \min($sameCount, $this->contextLines);
-
-            $fromRange -= $sameCount;
-            $toRange -= $sameCount;
-
-            $this->writeHunk(
-                $diff,
-                $hunkCapture - $contextStartOffset,
-                $i - $sameCount + $contextEndOffset + 1,
-                $fromStart - $contextStartOffset,
-                $fromRange + $contextStartOffset + $contextEndOffset,
-                $toStart - $contextStartOffset,
-                $toRange + $contextStartOffset + $contextEndOffset,
-                $output
-            );
+        if (false === $hunkCapture) {
+            return;
         }
+
+        // we end here when cutoff (commonLineThreshold) was not reached, but we where capturing a hunk,
+        // do not render hunk till end automatically because the number of context lines might be less than the commonLineThreshold
+
+        $contextStartOffset = $hunkCapture - $this->contextLines < 0
+            ? $hunkCapture
+            : $this->contextLines
+        ;
+
+        // prevent trying to write out more common lines than there are in the diff _and_
+        // do not write more than configured through the context lines
+        $contextEndOffset = \min($sameCount, $this->contextLines);
+
+        $fromRange -= $sameCount;
+        $toRange -= $sameCount;
+
+        $this->writeHunk(
+            $diff,
+            $hunkCapture - $contextStartOffset,
+            $i - $sameCount + $contextEndOffset + 1,
+            $fromStart - $contextStartOffset,
+            $fromRange + $contextStartOffset + $contextEndOffset,
+            $toStart - $contextStartOffset,
+            $toRange + $contextStartOffset + $contextEndOffset,
+            $output
+        );
     }
 
     private function writeHunk(
@@ -297,6 +318,11 @@ final class UnifiedDiffOutputBuilder implements DiffOutputBuilderInterface
                 $this->changed = true;
                 \fwrite($output, $diff[$i][0]);
             }
+            //} elseif ($diff[$i][1] === 3) { // custom comment inserted by PHPUnit/diff package
+                //  skip
+            //} else {
+                //  unknown/invalid
+            //}
         }
     }
 }

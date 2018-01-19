@@ -523,6 +523,31 @@ final class UnifiedDiffOutputBuilderTest extends AbstractDiffOutputBuilderTest
                 $to,
                 7,
             ],
+            'M no linebreak EOF .1' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,14 +1,14 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n-M\n+M\n\\ No newline at end of file\n",
+                $from,
+                \substr($to, 0, -1),
+                7,
+            ],
+            'M no linebreak EOF .2' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,14 +1,14 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n-M\n\\ No newline at end of file\n+M\n",
+                \substr($from, 0, -1),
+                $to,
+                7,
+            ],
+            'M no linebreak EOF .3' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,14 +1,14 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n M\n",
+                \substr($from, 0, -1),
+                \substr($to, 0, -1),
+                7,
+            ],
+            'M no linebreak EOF .4' => [
+                "--- input.txt\n+++ output.txt\n@@ -1,14 +1,14 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n M\n\\ No newline at end of file\n",
+                \substr($from, 0, -1),
+                \substr($to, 0, -1),
+                10000,
+                10000,
+            ],
             'M+1' => [
                 "--- input.txt\n+++ output.txt\n@@ -1,14 +1,14 @@\n A\n B\n C\n D\n E\n F\n-X\n+Y\n G\n H\n I\n J\n K\n L\n M\n",
                 $from,
