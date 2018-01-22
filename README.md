@@ -77,13 +77,13 @@ Diff:
 ```
 
 Options:
-- `contextLines`, default: `3`.
 - `collapseRanges`, default: `true`.
+- `commonLineThreshold`, default: `6`.
+- `contextLines`, default: `3`.
 - `fromFile`, default: `<null>`.
 - `fromFileDate`, default: `<null>`.
 - `toFile`, default: `<null>`.
 - `toFileDate`, default: `<null>`.
-- `commonLineThreshold`, default: `6`.
 
 
 ### Links
