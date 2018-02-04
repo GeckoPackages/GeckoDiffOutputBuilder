@@ -7,11 +7,11 @@
     "keywords": ["PHPUnit", "Extension", "diff", "udiff", "unidiff", "unified diff"],
     "require": {
         "php": "^7.0",
-        "sebastian/diff": "^2.0"
+        "sebastian/diff": "^2.0 || ^3.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.7",
-        "phpunit/phpunit": "^6.3.0",
+        "phpunit/phpunit": "^6.3.0 || ^7.0",
         "symfony/process": "^3.3"
     },
     "autoload": {
